@@ -65,9 +65,12 @@ create table if not exists public.environment_members (
   primary key (environment_id, user_id)
 );
 
+-- Kegiatan menempel ke ORANG (owner_user_id), bukan ke satu environment.
+-- Environment cuma menentukan siapa yang boleh MELIHAT kalender siapa — jadi
+-- kegiatan cukup diedit sekali dan otomatis kelihatan di semua environment
+-- tempat pemiliknya jadi anggota. Lihat kebijakan "events_select" di bawah.
 create table if not exists public.events (
   id uuid primary key default gen_random_uuid(),
-  environment_id uuid not null references public.environments (id) on delete cascade,
   owner_user_id uuid not null references public.profiles (id) on delete cascade,
   judul text not null,
   tanggal date not null,
@@ -78,8 +81,13 @@ create table if not exists public.events (
   created_at timestamptz not null default now()
 );
 
+-- Migrasi dari versi schema LAMA (events masih punya kolom environment_id):
+alter table public.events drop constraint if exists events_environment_id_fkey;
+drop index if exists idx_events_environment_tanggal;
+alter table public.events drop column if exists environment_id;
+
 create index if not exists idx_environment_members_user on public.environment_members (user_id);
-create index if not exists idx_events_environment_tanggal on public.events (environment_id, tanggal);
+create index if not exists idx_events_owner_tanggal on public.events (owner_user_id, tanggal);
 
 -- ----------------------------------------------------------------------------
 -- 2. HELPER FUNCTIONS (security definer -> aman dari rekursi RLS)
@@ -292,17 +300,16 @@ create policy "environment_members_delete" on public.environment_members
     or (public.is_environment_owner(environment_id) and user_id <> auth.uid()) -- owner keluarkan anggota
   );
 
--- events: lihat semua event di environment yang kita ikuti, tapi hanya boleh
--- ubah/hapus event milik sendiri.
+-- events: lihat kegiatan diri sendiri + siapa pun yang satu environment
+-- dengan kita (pakai helper yang sama dengan profiles_select), tapi hanya
+-- boleh ubah/hapus kegiatan milik sendiri.
 drop policy if exists "events_select" on public.events;
 create policy "events_select" on public.events
-  for select using (public.is_environment_member(environment_id));
+  for select using (owner_user_id = auth.uid() or public.shares_environment_with(owner_user_id));
 
 drop policy if exists "events_insert_own" on public.events;
 create policy "events_insert_own" on public.events
-  for insert with check (
-    owner_user_id = auth.uid() and public.is_environment_member(environment_id)
-  );
+  for insert with check (owner_user_id = auth.uid());
 
 drop policy if exists "events_update_own" on public.events;
 create policy "events_update_own" on public.events

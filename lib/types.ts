@@ -23,7 +23,6 @@ export interface EnvironmentMember {
 
 export interface CalendarEvent {
   id: string;
-  environment_id: string;
   owner_user_id: string;
   judul: string;
   tanggal: string; // yyyy-MM-dd
@@ -58,7 +57,6 @@ export type Database = {
       events: {
         Row: CalendarEvent;
         Insert: Partial<CalendarEvent> & {
-          environment_id: string;
           owner_user_id: string;
           judul: string;
           tanggal: string;

@@ -50,20 +50,31 @@ export default function CalendarApp({
   const [formDefaultDate, setFormDefaultDate] = useState<Date | null>(null);
   const [membersModalOpen, setMembersModalOpen] = useState(false);
 
+  const memberIds = useMemo(() => members.map((m) => m.user_id), [members]);
+
+  // Events belong to a person, not an environment — an environment only
+  // decides who can see whose calendar. Fetching by the current environment's
+  // member list (rather than a stored environment_id on the event) means
+  // editing an event once updates it everywhere that person's calendar is visible.
   const fetchEvents = useCallback(async () => {
+    if (memberIds.length === 0) {
+      setEvents([]);
+      return;
+    }
     const { data } = await supabase
       .from("events")
       .select("*")
-      .eq("environment_id", environment.id)
+      .in("owner_user_id", memberIds)
       .order("tanggal");
     setEvents(data ?? []);
-  }, [supabase, environment.id]);
+  }, [supabase, memberIds]);
 
   useEffect(() => {
     fetchEvents();
   }, [fetchEvents]);
 
   useEffect(() => {
+    if (memberIds.length === 0) return;
     const channel = supabase
       .channel(`events-${environment.id}`)
       .on(
@@ -72,7 +83,7 @@ export default function CalendarApp({
           event: "*",
           schema: "public",
           table: "events",
-          filter: `environment_id=eq.${environment.id}`,
+          filter: `owner_user_id=in.(${memberIds.join(",")})`,
         },
         () => fetchEvents()
       )
@@ -81,7 +92,7 @@ export default function CalendarApp({
     return () => {
       supabase.removeChannel(channel);
     };
-  }, [supabase, environment.id, fetchEvents]);
+  }, [supabase, environment.id, memberIds, fetchEvents]);
 
   const eventsByDate = useMemo(() => {
     const map: Record<string, CalendarEvent[]> = {};
@@ -208,7 +219,6 @@ export default function CalendarApp({
         onClose={() => setEventFormOpen(false)}
         defaultDate={formDefaultDate}
         editingEvent={editingEvent}
-        environmentId={environment.id}
         currentUserId={currentUserId}
         onSaved={() => {
           setEventFormOpen(false);

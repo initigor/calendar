@@ -11,7 +11,6 @@ export default function EventForm({
   onClose,
   defaultDate,
   editingEvent,
-  environmentId,
   currentUserId,
   onSaved,
 }: {
@@ -19,7 +18,6 @@ export default function EventForm({
   onClose: () => void;
   defaultDate: Date | null;
   editingEvent: CalendarEvent | null;
-  environmentId: string;
   currentUserId: string;
   onSaved: () => void;
 }) {
@@ -63,7 +61,6 @@ export default function EventForm({
     setError(null);
 
     const payload = {
-      environment_id: environmentId,
       owner_user_id: currentUserId,
       judul: judul.trim(),
       tanggal,
