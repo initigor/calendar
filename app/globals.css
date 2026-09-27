@@ -1,0 +1,52 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* --brand-* are "R G B" triplets (no rgb() wrapper) so Tailwind's
+   <alpha-value> opacity modifiers (e.g. bg-brand/30) work. */
+:root,
+:root[data-theme="default"] {
+  --canvas: #f5f5f7;
+  --brand: 59 130 246;
+  --brand-dark: 37 99 235;
+  --brand-tint: 239 246 255;
+}
+
+:root[data-theme="pink"] {
+  --canvas: #ffffff;
+  --brand: 236 72 153;
+  --brand-dark: 219 39 119;
+  --brand-tint: 253 242 248;
+}
+
+:root[data-theme="blue"] {
+  --canvas: #ffffff;
+  --brand: 14 165 233;
+  --brand-dark: 2 132 199;
+  --brand-tint: 240 249 255;
+}
+
+html,
+body {
+  height: 100%;
+}
+
+* {
+  -webkit-tap-highlight-color: transparent;
+}
+
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-thumb {
+  background: rgba(0, 0, 0, 0.15);
+  border-radius: 3px;
+}
+
+.safe-top {
+  padding-top: env(safe-area-inset-top);
+}
+.safe-bottom {
+  padding-bottom: env(safe-area-inset-bottom);
+}
