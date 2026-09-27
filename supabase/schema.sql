@@ -256,9 +256,15 @@ create policy "profiles_update_self" on public.profiles
   for update using (id = auth.uid()) with check (id = auth.uid());
 
 -- environments: hanya anggota yang bisa lihat; hanya owner yang bisa ubah/hapus
+--
+-- owner_id = auth.uid() dicek langsung (bukan cuma is_environment_member) karena
+-- `insert ... select()` dari client butuh RETURNING baris yang baru dibuat, dan
+-- RETURNING dievaluasi terhadap SELECT policy SEBELUM trigger on_environment_created
+-- sempat memasukkan baris owner ke environment_members — kalau cuma mengandalkan
+-- is_environment_member(id), insert pertama akan selalu gagal dengan error RLS.
 drop policy if exists "environments_select" on public.environments;
 create policy "environments_select" on public.environments
-  for select using (public.is_environment_member(id));
+  for select using (owner_id = auth.uid() or public.is_environment_member(id));
 
 drop policy if exists "environments_insert" on public.environments;
 create policy "environments_insert" on public.environments
