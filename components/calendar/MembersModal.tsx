@@ -7,6 +7,7 @@ import { colorForUser } from "@/lib/colors";
 import { useTheme } from "@/components/ThemeProvider";
 import Modal from "@/components/ui/Modal";
 import ThemeModal from "@/components/ThemeModal";
+import InstallInstructionsModal from "@/components/InstallInstructionsModal";
 import type { EnvironmentMember } from "@/lib/types";
 
 export default function MembersModal({
@@ -31,6 +32,7 @@ export default function MembersModal({
   const [error, setError] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
   const [showTheme, setShowTheme] = useState(false);
+  const [showInstall, setShowInstall] = useState(false);
 
   const isOwner = environment.owner_id === currentUserId;
 
@@ -122,14 +124,22 @@ export default function MembersModal({
         </button>
       </div>
 
-      <div className="mb-5">
-        <p className="text-xs font-medium text-gray-500 mb-1.5">Tema tampilan</p>
+      <div className="mb-5 space-y-2">
+        <p className="text-xs font-medium text-gray-500 mb-1.5">Tampilan & Aplikasi</p>
         <button
           onClick={() => setShowTheme(true)}
           className="w-full flex items-center gap-2.5 rounded-xl border border-gray-200 bg-gray-50 px-3.5 py-2.5"
         >
           <span className="text-base">🎨</span>
           <span className="flex-1 text-left text-sm text-ink">Ganti tema</span>
+          <span className="text-gray-300">›</span>
+        </button>
+        <button
+          onClick={() => setShowInstall(true)}
+          className="w-full flex items-center gap-2.5 rounded-xl border border-gray-200 bg-gray-50 px-3.5 py-2.5"
+        >
+          <span className="text-base">📲</span>
+          <span className="flex-1 text-left text-sm text-ink">Pasang aplikasi</span>
           <span className="text-gray-300">›</span>
         </button>
       </div>
@@ -220,6 +230,7 @@ export default function MembersModal({
       )}
 
       <ThemeModal open={showTheme} onClose={() => setShowTheme(false)} />
+      <InstallInstructionsModal open={showInstall} onClose={() => setShowInstall(false)} />
     </Modal>
   );
 }

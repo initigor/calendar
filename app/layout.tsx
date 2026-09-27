@@ -3,6 +3,7 @@ import { Inter } from "next/font/google";
 import "./globals.css";
 import ServiceWorkerRegister from "@/components/ServiceWorkerRegister";
 import { ThemeProvider } from "@/components/ThemeProvider";
+import { InstallProvider } from "@/components/InstallProvider";
 
 const inter = Inter({ subsets: ["latin"], variable: "--font-inter", display: "swap" });
 
@@ -40,8 +41,10 @@ export default function RootLayout({
     <html lang="id" className={inter.variable}>
       <body className="bg-canvas text-ink font-sans antialiased overscroll-none">
         <ThemeProvider>
-          {children}
-          <ServiceWorkerRegister />
+          <InstallProvider>
+            {children}
+            <ServiceWorkerRegister />
+          </InstallProvider>
         </ThemeProvider>
       </body>
     </html>

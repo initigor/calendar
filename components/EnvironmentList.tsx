@@ -8,6 +8,7 @@ import { useTheme } from "@/components/ThemeProvider";
 import Modal from "@/components/ui/Modal";
 import ThemeModal from "@/components/ThemeModal";
 import InstallPrompt from "@/components/InstallPrompt";
+import InstallInstructionsModal from "@/components/InstallInstructionsModal";
 import type { EnvironmentSummary } from "@/app/environments/page";
 
 export default function EnvironmentList({
@@ -24,6 +25,7 @@ export default function EnvironmentList({
   const [showCreate, setShowCreate] = useState(false);
   const [showJoin, setShowJoin] = useState(false);
   const [showTheme, setShowTheme] = useState(false);
+  const [showInstall, setShowInstall] = useState(false);
   const [nama, setNama] = useState("");
   const [code, setCode] = useState("");
   const [busy, setBusy] = useState(false);
@@ -93,6 +95,13 @@ export default function EnvironmentList({
           <h1 className="text-2xl font-semibold text-ink">{userName}</h1>
         </div>
         <div className="flex items-center gap-1.5">
+          <button
+            onClick={() => setShowInstall(true)}
+            aria-label="Pasang aplikasi"
+            className="w-9 h-9 rounded-full bg-white shadow-card flex items-center justify-center active:bg-gray-50"
+          >
+            <span className="text-[15px]">📲</span>
+          </button>
           <button
             onClick={() => setShowTheme(true)}
             aria-label="Tema tampilan"
@@ -219,6 +228,7 @@ export default function EnvironmentList({
       </Modal>
 
       <ThemeModal open={showTheme} onClose={() => setShowTheme(false)} />
+      <InstallInstructionsModal open={showInstall} onClose={() => setShowInstall(false)} />
     </div>
   );
 }
